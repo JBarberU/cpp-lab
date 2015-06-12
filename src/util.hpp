@@ -28,7 +28,7 @@ void time(Func f, size_t iterations)
   print_vector(results, ", ");
 
   std::sort(results.begin(), results.end());
-  double sum = std::accumulate(results.begin(), results.end(), 0);
+  double sum = std::accumulate(results.begin(), results.end(), 0.0);
   double mean = (sum / static_cast<double>(results.size()));
 
   double a(0.0);
@@ -37,10 +37,20 @@ void time(Func f, size_t iterations)
     a += (v - mean) * (v - mean);
   });
 
-  double standar_deviation = std::sqrt(a / static_cast<double>(results.size()));
+  double standard_deviation = std::sqrt(a / static_cast<double>(results.size()));
 
   std::cout << "Sum: " << sum << std::endl;
   std::cout << "Mean: " << mean << std::endl;
   std::cout << "Median: " << results[results.size() / 2] << std::endl;
-  std::cout << "Standard deviation: " << standar_deviation << std::endl;
+  std::cout << "Standard deviation: " << standard_deviation << std::endl;
+}
+
+template <typename T>
+std::vector<T> operator +(const std::vector<T> &rhs, const std::vector<T> &lhs)
+{
+  std::vector<T> result;
+  result.reserve(lhs.size() + rhs.size());
+  result.insert(result.end(), lhs.begin(), lhs.end());
+  result.insert(result.end(), rhs.begin(), rhs.end());
+  return result;
 }
