@@ -8,8 +8,9 @@
 template<typename T, typename Delim_t>
 void printVector(const std::vector<T> &vec, Delim_t delim)
 {
-  for (size_t i(0); i < vec.size() - 1; ++i)
-    std::cout << vec[i] << delim;
+  std::for_each(vec.begin(), vec.end() - 1, [delim](const T &v){
+    std::cout << v << delim;
+  });
   std::cout << vec.back() << std::endl;
 }
 
@@ -35,19 +36,11 @@ std::vector<int> primes(int maxVal)
 
 int fak(int val)
 {
-  if (val == 1)
-    return 1;
-  else
-    return val * fak(val - 1);
+  return val == 1 ? 1 : val * fak(val - 1);
 }
 
 template<typename Func>
-void time_intermediates(Func f, size_t iterations)
-{
-}
-
-template<typename Func>
-void time_no_intermediates(Func f, size_t iterations)
+void time(Func f, size_t iterations)
 {
   std::vector<double> results;
   for (size_t i(0); i < iterations; ++i)
@@ -63,20 +56,21 @@ void time_no_intermediates(Func f, size_t iterations)
 
   std::sort(results.begin(), results.end());
   double sum = std::accumulate(results.begin(), results.end(), 0);
-  double mean = (total / static_cast<double>(results.size()));
+  double mean = (sum / static_cast<double>(results.size()));
 
+  double a(0.0);
+
+  std::for_each(results.begin(), results.end(), [&a, mean](double v){
+    a += (v - mean) * (v - mean);
+  });
+
+  double standar_deviation = std::sqrt(a / static_cast<double>(results.size()));
 
   std::cout << "Sum: " << sum << std::endl;
   std::cout << "Mean: " << mean << std::endl;
   std::cout << "Median: " << results[results.size() / 2] << std::endl;
+  std::cout << "Standard deviation: " << standar_deviation << std::endl;
 }
-
-template<typename Func>
-void time(Func f, size_t iterations, bool printIntermediates)
-{
-  printIntermediates ? time_intermediates(f, iterations) : time_no_intermediates(f, iterations);
-}
-
 
 int main(int argc, char** argv)
 {
@@ -92,7 +86,7 @@ int main(int argc, char** argv)
 
   //f.wait();
 
-  time([](){primes(100000);}, 10, false);
+  time([](){primes(100000);}, 10);
 
   return 0;
 }
