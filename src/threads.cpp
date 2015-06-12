@@ -1,5 +1,7 @@
 #include "util.hpp"
 
+#include <future>
+
 std::vector<int> primes(int maxVal)
 {
   std::vector<int> p{2};
@@ -40,7 +42,48 @@ int main(int argc, char** argv)
 
   //f.wait();
 
-  time([](){primes(100000);}, 10);
+  constexpr int maxPrime(100000);
+
+  std::cout << "Single threaded" << std::endl;
+  time([](){
+    std::vector<int> p1(primes(maxPrime));
+    std::vector<int> p2(primes(maxPrime));
+    std::vector<int> p3(primes(maxPrime));
+    std::vector<int> p4(primes(maxPrime));
+    std::vector<int> p5(primes(maxPrime));
+    std::vector<int> p6(primes(maxPrime));
+    std::vector<int> combined;
+    combined.insert(combined.end(), p1.begin(), p1.end());
+    combined.insert(combined.end(), p2.begin(), p2.end());
+    combined.insert(combined.end(), p3.begin(), p3.end());
+    combined.insert(combined.end(), p4.begin(), p4.end());
+    combined.insert(combined.end(), p5.begin(), p5.end());
+    combined.insert(combined.end(), p6.begin(), p6.end());
+    std::sort(combined.begin(), combined.end());
+  }, 10);
+  std::cout << "Multi threaded" << std::endl;
+  time([](){
+    std::future<std::vector<int> > f1 = std::async(std::launch::async, [](){ return primes(maxPrime); });
+    std::future<std::vector<int> > f2 = std::async(std::launch::async, [](){ return primes(maxPrime); });
+    std::future<std::vector<int> > f3 = std::async(std::launch::async, [](){ return primes(maxPrime); });
+    std::future<std::vector<int> > f4 = std::async(std::launch::async, [](){ return primes(maxPrime); });
+    std::future<std::vector<int> > f5 = std::async(std::launch::async, [](){ return primes(maxPrime); });
+    std::future<std::vector<int> > f6 = std::async(std::launch::async, [](){ return primes(maxPrime); });
+    std::vector<int> combined;
+    std::vector<int> p1(f1.get());
+    combined.insert(combined.end(), p1.begin(), p1.end());
+    std::vector<int> p2(f2.get());
+    combined.insert(combined.end(), p2.begin(), p2.end());
+    std::vector<int> p3(f3.get());
+    combined.insert(combined.end(), p3.begin(), p3.end());
+    std::vector<int> p4(f4.get());
+    combined.insert(combined.end(), p4.begin(), p4.end());
+    std::vector<int> p5(f5.get());
+    combined.insert(combined.end(), p5.begin(), p5.end());
+    std::vector<int> p6(f6.get());
+    combined.insert(combined.end(), p6.begin(), p6.end());
+    std::sort(combined.begin(), combined.end());
+  }, 10);
 
   return 0;
 }
